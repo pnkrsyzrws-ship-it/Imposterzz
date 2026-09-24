@@ -3,40 +3,58 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Word Impostor Game</title>
-  <meta name="theme-color" content="#4f46e5">
-  
+  <title>Word Impostor - Modern Party Game</title>
+  <meta name="theme-color" content="#6366f1">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; min-height: 100vh; align-items: center; justify-content: center; padding: 15px; }
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background: var(--bg-dark); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; align-items: center; justify-content: center; padding: 16px; transition: background 0.5s ease; }
     
-    .card { background: #1e293b; border-radius: 16px; width: 100%; max-width: 420px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; border: 1px solid #334155; }
-    h1 { color: #818cf8; margin-bottom: 5px; font-size: 26px; }
-    p { color: #94a3b8; font-size: 14px; margin-bottom: 15px; }
+    .card { background: var(--card-bg); border-radius: 20px; width: 100%; max-width: 440px; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); text-align: center; border: 1px solid var(--border-color); backdrop-filter: blur(10px); }
     
-    .input-group { margin-bottom: 12px; text-align: left; }
-    label { font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 4px; }
-    select, input { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white; font-size: 15px; }
+    .title { font-size: 28px; font-weight: 800; background: linear-gradient(135deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 6px; }
+    .subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; }
     
-    .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; margin-top: 10px; }
-    .btn-primary { background: #6366f1; color: white; }
-    .btn-primary:active { background: #4f46e5; }
-    .btn-danger { background: #ef4444; color: white; }
-    .btn-danger:active { background: #dc2626; }
+    .input-group { margin-bottom: 16px; text-align: left; }
+    label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
+    select, input { width: 100%; padding: 14px; background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 12px; color: white; font-size: 15px; outline: none; transition: border 0.2s; }
+    select:focus, input:focus { border-color: var(--accent); }
+
+    .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: 700; font-size: 16px; cursor: pointer; transition: all 0.2s ease; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .btn-primary { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
+    .btn-danger:active { transform: scale(0.98); }
+
+    .reveal-box { background: var(--bg-dark); padding: 30px 20px; border-radius: 16px; border: 2px dashed var(--border-color); margin: 20px 0; min-height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; transition: all 0.3s ease; }
+    .word-text { font-size: 30px; font-weight: 900; color: #38bdf8; letter-spacing: 1.5px; text-transform: uppercase; }
+    .hint-text { font-size: 15px; color: #fbbf24; margin-top: 12px; font-weight: 600; line-height: 1.4; }
+
+    /* RED WARNING THEME FOR IMPOSTOR */
+    .impostor-alert { background: #450a0a !important; border-color: #ef4444 !important; animation: pulse 1.2s infinite alternate; }
+    .impostor-text { color: #fca5a5 !important; font-size: 26px !important; text-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
     
-    .reveal-box { background: #0f172a; padding: 25px; border-radius: 12px; border: 2px dashed #475569; margin: 15px 0; min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .word-text { font-size: 28px; font-weight: bold; color: #38bdf8; letter-spacing: 1px; }
-    .hint-text { font-size: 16px; color: #fbbf24; margin-top: 8px; }
+    @keyframes pulse {
+      from { box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
+      to { box-shadow: 0 0 30px rgba(239, 68, 68, 0.8); }
+    }
+
+    .player-list { text-align: left; margin: 16px 0; max-height: 200px; overflow-y: auto; padding-right: 4px; }
+    .player-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--bg-dark); border-radius: 10px; margin-bottom: 8px; border: 1px solid var(--border-color); }
     
-    .impostor-alert { background: #450a0a !important; border-color: #ef4444 !important; animation: pulse 1s infinite alternate; }
-    .impostor-text { color: #fca5a5 !important; font-size: 32px !important; }
-    
-    @keyframes pulse { from { box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); } to { box-shadow: 0 0 25px rgba(239, 68, 68, 0.9); } }
-    
-    .player-list { text-align: left; margin: 15px 0; max-height: 180px; overflow-y: auto; }
-    .player-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #0f172a; border-radius: 6px; margin-bottom: 6px; }
-    
-    .timer { font-size: 36px; font-weight: bold; color: #a855f7; margin: 10px 0; }
+    .timer { font-size: 42px; font-weight: 900; color: #a855f7; margin: 12px 0; font-mono: monospace; }
+    .badge { background: #334155; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
     .hidden { display: none !important; }
   </style>
 </head>
@@ -44,117 +62,126 @@
 
   <!-- STEP 1: SETUP SCREEN -->
   <div id="screen-setup" class="card">
-    <h1>🕵️ Word Impostor</h1>
-    <p>Find who doesn't know the secret word!</p>
+    <div class="title">🕵️ Word Impostor</div>
+    <div class="subtitle">Find who doesn't know the secret word!</div>
     
     <div class="input-group">
-      <label>Category</label>
+      <label>Select Category</label>
       <select id="category-select">
-        <option value="Food">🍕 Fast Food</option>
-        <option value="Animals">🦁 Animals</option>
-        <option value="Movies">🎬 Movies</option>
-        <option value="Objects">📱 Objects</option>
+        <option value="Food">🍕 Fast Food & Dishes</option>
+        <option value="Animals">🦁 Wild Animals</option>
+        <option value="Movies">🎬 Blockbuster Movies</option>
+        <option value="Objects">📱 Everyday Tech & Gadgets</option>
+        <option value="Countries">🌍 World Countries</option>
       </select>
     </div>
 
     <div class="input-group">
-      <label>Number of Players (3-8)</label>
+      <label>Number of Players</label>
       <select id="player-count" onchange="generatePlayerInputs()">
         <option value="3">3 Players</option>
         <option value="4" selected>4 Players</option>
         <option value="5">5 Players</option>
         <option value="6">6 Players</option>
+        <option value="7">7 Players</option>
+        <option value="8">8 Players</option>
       </select>
     </div>
 
     <div class="player-list" id="player-inputs"></div>
 
-    <button class="btn btn-primary" onclick="startGame()">Start Game</button>
+    <button class="btn btn-primary" onclick="startGame()">🚀 Start Game</button>
   </div>
 
   <!-- STEP 2: REVEAL SCREEN -->
   <div id="screen-reveal" class="card hidden">
-    <h2 id="current-player-title">Player 1's Turn</h2>
-    <p>Hand the phone to this player.</p>
+    <h2 id="current-player-title" style="font-size: 22px;">Player 1's Turn</h2>
+    <p class="subtitle">Hand the phone to this player</p>
 
     <div id="reveal-card" class="reveal-box">
-      <p style="color:#64748b;" id="reveal-instruction">Tap button to view your role</p>
+      <p style="color:#64748b; font-weight: 600;" id="reveal-instruction">🔒 Tap button below to view your secret role</p>
       <div id="reveal-content" class="hidden">
         <div id="role-text" class="word-text">WORD</div>
         <div id="hint-text" class="hint-text"></div>
       </div>
     </div>
 
-    <button id="btn-show" class="btn btn-primary" onclick="showSecret()">Tap to See Role</button>
-    <button id="btn-next" class="btn btn-danger hidden" onclick="nextPlayer()">Done (Hide & Pass Phone)</button>
+    <button id="btn-show" class="btn btn-primary" onclick="showSecret()">👁️ Reveal Role</button>
+    <button id="btn-next" class="btn btn-danger hidden" onclick="nextPlayer()">🙈 Hide & Pass Phone</button>
   </div>
 
   <!-- STEP 3: DISCUSSION SCREEN -->
   <div id="screen-discuss" class="card hidden">
-    <h2>🗣️ Discussion Time</h2>
-    <p>Speak in order! Give 1 subtle clue about your word.</p>
+    <h2>🗣️ Discussion Phase</h2>
+    <p class="subtitle">Speak in order! Give 1 subtle clue about your word.</p>
     
     <div class="timer" id="timer-display">02:00</div>
 
-    <button class="btn btn-primary" onclick="startTimer()">Start Timer</button>
-    <button class="btn btn-danger" onclick="showVoting()">Go to Voting</button>
+    <button class="btn btn-primary" onclick="startTimer()">⏱️ Start 2-Min Timer</button>
+    <button class="btn btn-danger" onclick="showVoting()">🗳️ Proceed to Vote</button>
   </div>
 
   <!-- STEP 4: VOTING SCREEN -->
   <div id="screen-vote" class="card hidden">
     <h2>🗳️ Who is the Impostor?</h2>
-    <p>Vote for the player you think is lying.</p>
+    <p class="subtitle">Discuss and cast your votes!</p>
     
     <div class="player-list" id="vote-list"></div>
 
-    <button class="btn btn-danger" onclick="revealImpostor()">Reveal Impostor</button>
+    <button class="btn btn-danger" onclick="revealImpostor()">🚨 Reveal Impostor</button>
   </div>
 
   <!-- STEP 5: RESULT SCREEN -->
   <div id="screen-result" class="card hidden">
-    <h2>🎉 Game Results</h2>
+    <h2>🎉 Game Over</h2>
     <br>
     <div class="reveal-box">
-      <p>The Impostor was:</p>
-      <div id="impostor-name" class="word-text" style="color: #ef4444;">-</div>
-      <br>
-      <p>The Secret Word was:</p>
-      <div id="secret-word-display" class="word-text">-</div>
+      <p style="color: #94a3b8; font-size: 13px; text-transform: uppercase; font-weight: bold;">The Impostor Was</p>
+      <div id="impostor-name" class="word-text" style="color: #ef4444; font-size: 32px; margin-bottom: 15px;">-</div>
+      
+      <p style="color: #94a3b8; font-size: 13px; text-transform: uppercase; font-weight: bold;">Secret Word</p>
+      <div id="secret-word-display" class="word-text" style="color: #38bdf8;">-</div>
     </div>
 
-    <button class="btn btn-primary" onclick="resetGame()">Play Again</button>
+    <button class="btn btn-primary" onclick="resetGame()">🔄 Play Again</button>
   </div>
 
   <script>
-    // Game Words & Impostor Hints Database
     const DATABASE = {
       Food: [
-        { word: "PIZZA", hint: "Popular fast food cooked in a hot oven" },
-        { word: "BURGER", hint: "Round sandwich usually with meat and cheese" },
-        { word: "SUSHI", hint: "Japanese dish with rice and seaweed" },
-        { word: "ICE CREAM", hint: "Cold sweet dessert served in a cone" }
+        { word: "PIZZA", hint: "Category: Food (Baked in an oven with toppings)" },
+        { word: "BURGER", hint: "Category: Food (Round meat patty served in a bun)" },
+        { word: "SUSHI", hint: "Category: Food (Japanese dish with vinegared rice & seaweed)" },
+        { word: "TACOS", hint: "Category: Food (Mexican folded tortilla with fillings)" },
+        { word: "ICE CREAM", hint: "Category: Food (Frozen sweet dessert served in a cone)" }
       ],
       Animals: [
-        { word: "LION", hint: "Big wild cat known as the king" },
-        { word: "PENGUIN", hint: "Black and white bird that lives in cold areas" },
-        { word: "ELEPHANT", hint: "Huge animal with a long nose trunk" },
-        { word: "DOG", hint: "Friendly house pet that barks" }
+        { word: "LION", hint: "Category: Animal (Big cat known as the king of the jungle)" },
+        { word: "PENGUIN", hint: "Category: Animal (Flightless bird living in cold regions)" },
+        { word: "ELEPHANT", hint: "Category: Animal (Largest land mammal with a trunk)" },
+        { word: "KANGAROO", hint: "Category: Animal (Australian marsupial that hops)" },
+        { word: "DOLPHIN", hint: "Category: Animal (Intelligent marine mammal that jumps)" }
       ],
       Movies: [
-        { word: "TITANIC", hint: "Famous movie about a huge sinking ship" },
-        { word: "AVATAR", hint: "Movie with blue alien characters" },
-        { word: "SPIDER-MAN", hint: "Hero who wears red/blue and climbs walls" },
-        { word: "JURASSIC PARK", hint: "Movie with dangerous dinosaurs" }
+        { word: "TITANIC", hint: "Category: Movie (Famous story about an ocean liner)" },
+        { word: "AVATAR", hint: "Category: Movie (Features blue humanoid aliens on Pandora)" },
+        { word: "SPIDER-MAN", hint: "Category: Movie (Hero bitten by a radioactive insect)" },
+        { word: "INCEPTION", hint: "Category: Movie (Mind-bending film about dreams within dreams)" }
       ],
       Objects: [
-        { word: "SMARTPHONE", hint: "Screen device you use for calls and apps" },
-        { word: "TELEVISION", hint: "Big screen in the living room for shows" },
-        { word: "LAPTOP", hint: "Portable computer you can fold" },
-        { word: "HEADPHONES", hint: "Device you wear over ears for music" }
+        { word: "SMARTPHONE", hint: "Category: Tech (Touchscreen device in your pocket)" },
+        { word: "HEADPHONES", hint: "Category: Tech (Audio device worn over or in your ears)" },
+        { word: "LAPTOP", hint: "Category: Tech (Portable folding personal computer)" },
+        { word: "SMARTWATCH", hint: "Category: Tech (Wearable wrist device that tracks fitness)" }
+      ],
+      Countries: [
+        { word: "JAPAN", hint: "Category: Country (East Asian island nation known for Tokyo)" },
+        { word: "BRAZIL", hint: "Category: Country (Largest South American country famous for Carnival)" },
+        { word: "FRANCE", hint: "Category: Country (European nation home to the Eiffel Tower)" },
+        { word: "EGYPT", hint: "Category: Country (African nation famous for ancient pyramids)" }
       ]
     };
 
-    // Audio Effects Engine
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSound(type) {
       if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -164,21 +191,20 @@
       gain.connect(audioCtx.destination);
 
       if (type === 'beep') {
-        osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(520, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
         osc.start();
-        osc.stop(audioCtx.currentTime + 0.1);
+        osc.stop(audioCtx.currentTime + 0.12);
       } else if (type === 'alarm') {
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(200, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.4);
-        gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(750, audioCtx.currentTime + 0.35);
+        gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
         osc.start();
-        osc.stop(audioCtx.currentTime + 0.4);
+        osc.stop(audioCtx.currentTime + 0.35);
       }
     }
 
-    // Game Variables
     let players = [];
     let impostorIndex = 0;
     let secretWord = "";
@@ -186,14 +212,13 @@
     let currentTurn = 0;
     let timerInterval = null;
 
-    // Render Input Fields for Players
     function generatePlayerInputs() {
       const count = parseInt(document.getElementById('player-count').value);
       const container = document.getElementById('player-inputs');
       container.innerHTML = "";
       for (let i = 1; i <= count; i++) {
         container.innerHTML += `
-          <div style="margin-bottom:6px;">
+          <div style="margin-bottom:8px;">
             <input type="text" id="p-name-${i}" value="Player ${i}">
           </div>
         `;
@@ -201,7 +226,6 @@
     }
     generatePlayerInputs();
 
-    // Start Game
     function startGame() {
       const count = parseInt(document.getElementById('player-count').value);
       players = [];
@@ -223,7 +247,6 @@
       updateRevealScreen();
     }
 
-    // Update Reveal Screen Status
     function updateRevealScreen() {
       document.getElementById('current-player-title').innerText = `${players[currentTurn]}'s Turn`;
       document.getElementById('reveal-instruction').classList.remove('hidden');
@@ -233,7 +256,6 @@
       document.getElementById('reveal-card').classList.remove('impostor-alert');
     }
 
-    // Show Secret Role
     function showSecret() {
       const isImpostor = (currentTurn === impostorIndex);
       const roleText = document.getElementById('role-text');
@@ -245,21 +267,20 @@
       if (isImpostor) {
         playSound('alarm');
         document.getElementById('reveal-card').classList.add('impostor-alert');
-        roleText.innerText = "🕵️ YOU ARE THE IMPOSTOR!";
+        roleText.innerText = "🚨 YOU ARE THE IMPOSTOR!";
         roleText.classList.add('impostor-text');
-        hintText.innerText = `Hint: ${impostorHint}`;
+        hintText.innerText = impostorHint;
       } else {
         playSound('beep');
         roleText.innerText = secretWord;
         roleText.classList.remove('impostor-text');
-        hintText.innerText = "You are a Civilian. Keep it secret!";
+        hintText.innerText = "You are a Civilian. Don't reveal the word!";
       }
 
       document.getElementById('btn-show').classList.add('hidden');
       document.getElementById('btn-next').classList.remove('hidden');
     }
 
-    // Pass to Next Player
     function nextPlayer() {
       currentTurn++;
       if (currentTurn < players.length) {
@@ -269,7 +290,6 @@
       }
     }
 
-    // Discussion Timer
     function startTimer() {
       let duration = 120;
       const display = document.getElementById('timer-display');
@@ -286,31 +306,31 @@
       }, 1000);
     }
 
-    // Voting List
     function showVoting() {
       clearInterval(timerInterval);
       const list = document.getElementById('vote-list');
       list.innerHTML = "";
       players.forEach((p) => {
-        list.innerHTML += `<div class="player-item"><span>👤 ${p}</span></div>`;
+        list.innerHTML += `
+          <div class="player-item">
+            <span>👤 <strong>${p}</strong></span>
+            <span class="badge">Player</span>
+          </div>`;
       });
       showScreen('screen-vote');
     }
 
-    // Reveal Result
     function revealImpostor() {
       document.getElementById('impostor-name').innerText = players[impostorIndex];
       document.getElementById('secret-word-display').innerText = secretWord;
       showScreen('screen-result');
     }
 
-    // Screen Switcher Helper
     function showScreen(screenId) {
       document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
       document.getElementById(screenId).classList.remove('hidden');
     }
 
-    // Reset Game
     function resetGame() {
       showScreen('screen-setup');
     }
