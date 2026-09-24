@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Word Impostor Game</title>
+  <meta name="theme-color" content="#4f46e5">
+  
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; min-height: 100vh; align-items: center; justify-content: center; padding: 15px; }
+    
+    .card { background: #1e293b; border-radius: 16px; width: 100%; max-width: 420px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; border: 1px solid #334155; }
+    h1 { color: #818cf8; margin-bottom: 5px; font-size: 26px; }
+    p { color: #94a3b8; font-size: 14px; margin-bottom: 15px; }
+    
+    .input-group { margin-bottom: 12px; text-align: left; }
+    label { font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 4px; }
+    select, input { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white; font-size: 15px; }
+    
+    .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+    .btn-primary { background: #6366f1; color: white; }
+    .btn-primary:active { background: #4f46e5; }
+    .btn-danger { background: #ef4444; color: white; }
+    .btn-danger:active { background: #dc2626; }
+    
+    .reveal-box { background: #0f172a; padding: 25px; border-radius: 12px; border: 2px dashed #475569; margin: 15px 0; min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .word-text { font-size: 28px; font-weight: bold; color: #38bdf8; letter-spacing: 1px; }
+    .hint-text { font-size: 16px; color: #fbbf24; margin-top: 8px; }
+    
+    .impostor-alert { background: #450a0a !important; border-color: #ef4444 !important; animation: pulse 1s infinite alternate; }
+    .impostor-text { color: #fca5a5 !important; font-size: 32px !important; }
+    
+    @keyframes pulse { from { box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); } to { box-shadow: 0 0 25px rgba(239, 68, 68, 0.9); } }
+    
+    .player-list { text-align: left; margin: 15px 0; max-height: 180px; overflow-y: auto; }
+    .player-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #0f172a; border-radius: 6px; margin-bottom: 6px; }
+    
+    .timer { font-size: 36px; font-weight: bold; color: #a855f7; margin: 10px 0; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- STEP 1: SETUP SCREEN -->
+  <div id="screen-setup" class="card">
+    <h1>🕵️ Word Impostor</h1>
+    <p>Find who doesn't know the secret word!</p>
+    
+    <div class="input-group">
+      <label>Category</label>
+      <select id="category-select">
+        <option value="Food">🍕 Fast Food</option>
+        <option value="Animals">🦁 Animals</option>
+        <option value="Movies">🎬 Movies</option>
+        <option value="Objects">📱 Objects</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label>Number of Players (3-8)</label>
+      <select id="player-count" onchange="generatePlayerInputs()">
+        <option value="3">3 Players</option>
+        <option value="4" selected>4 Players</option>
+        <option value="5">5 Players</option>
+        <option value="6">6 Players</option>
+      </select>
+    </div>
+
+    <div class="player-list" id="player-inputs"></div>
+
+    <button class="btn btn-primary" onclick="startGame()">Start Game</button>
+  </div>
+
+  <!-- STEP 2: REVEAL SCREEN -->
+  <div id="screen-reveal" class="card hidden">
+    <h2 id="current-player-title">Player 1's Turn</h2>
+    <p>Hand the phone to this player.</p>
+
+    <div id="reveal-card" class="reveal-box">
+      <p style="color:#64748b;" id="reveal-instruction">Tap button to view your role</p>
+      <div id="reveal-content" class="hidden">
+        <div id="role-text" class="word-text">WORD</div>
+        <div id="hint-text" class="hint-text"></div>
+      </div>
+    </div>
+
+    <button id="btn-show" class="btn btn-primary" onclick="showSecret()">Tap to See Role</button>
+    <button id="btn-next" class="btn btn-danger hidden" onclick="nextPlayer()">Done (Hide & Pass Phone)</button>
+  </div>
+
+  <!-- STEP 3: DISCUSSION SCREEN -->
+  <div id="screen-discuss" class="card hidden">
+    <h2>🗣️ Discussion Time</h2>
+    <p>Speak in order! Give 1 subtle clue about your word.</p>
+    
+    <div class="timer" id="timer-display">02:00</div>
+
+    <button class="btn btn-primary" onclick="startTimer()">Start Timer</button>
+    <button class="btn btn-danger" onclick="showVoting()">Go to Voting</button>
+  </div>
+
+  <!-- STEP 4: VOTING SCREEN -->
+  <div id="screen-vote" class="card hidden">
+    <h2>🗳️ Who is the Impostor?</h2>
+    <p>Vote for the player you think is lying.</p>
+    
+    <div class="player-list" id="vote-list"></div>
+
+    <button class="btn btn-danger" onclick="revealImpostor()">Reveal Impostor</button>
+  </div>
+
+  <!-- STEP 5: RESULT SCREEN -->
+  <div id="screen-result" class="card hidden">
+    <h2>🎉 Game Results</h2>
+    <br>
+    <div class="reveal-box">
+      <p>The Impostor was:</p>
+      <div id="impostor-name" class="word-text" style="color: #ef4444;">-</div>
+      <br>
+      <p>The Secret Word was:</p>
+      <div id="secret-word-display" class="word-text">-</div>
+    </div>
+
+    <button class="btn btn-primary" onclick="resetGame()">Play Again</button>
+  </div>
+
+  <script>
+    // Game Words & Impostor Hints Database
+    const DATABASE = {
+      Food: [
+        { word: "PIZZA", hint: "Popular fast food cooked in a hot oven" },
+        { word: "BURGER", hint: "Round sandwich usually with meat and cheese" },
+        { word: "SUSHI", hint: "Japanese dish with rice and seaweed" },
+        { word: "ICE CREAM", hint: "Cold sweet dessert served in a cone" }
+      ],
+      Animals: [
+        { word: "LION", hint: "Big wild cat known as the king" },
+        { word: "PENGUIN", hint: "Black and white bird that lives in cold areas" },
+        { word: "ELEPHANT", hint: "Huge animal with a long nose trunk" },
+        { word: "DOG", hint: "Friendly house pet that barks" }
+      ],
+      Movies: [
+        { word: "TITANIC", hint: "Famous movie about a huge sinking ship" },
+        { word: "AVATAR", hint: "Movie with blue alien characters" },
+        { word: "SPIDER-MAN", hint: "Hero who wears red/blue and climbs walls" },
+        { word: "JURASSIC PARK", hint: "Movie with dangerous dinosaurs" }
+      ],
+      Objects: [
+        { word: "SMARTPHONE", hint: "Screen device you use for calls and apps" },
+        { word: "TELEVISION", hint: "Big screen in the living room for shows" },
+        { word: "LAPTOP", hint: "Portable computer you can fold" },
+        { word: "HEADPHONES", hint: "Device you wear over ears for music" }
+      ]
+    };
+
+    // Audio Effects Engine
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSound(type) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      if (type === 'beep') {
+        osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
+      } else if (type === 'alarm') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.4);
+        gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.4);
+      }
+    }
+
+    // Game Variables
+    let players = [];
+    let impostorIndex = 0;
+    let secretWord = "";
+    let impostorHint = "";
+    let currentTurn = 0;
+    let timerInterval = null;
+
+    // Render Input Fields for Players
+    function generatePlayerInputs() {
+      const count = parseInt(document.getElementById('player-count').value);
+      const container = document.getElementById('player-inputs');
+      container.innerHTML = "";
+      for (let i = 1; i <= count; i++) {
+        container.innerHTML += `
+          <div style="margin-bottom:6px;">
+            <input type="text" id="p-name-${i}" value="Player ${i}">
+          </div>
+        `;
+      }
+    }
+    generatePlayerInputs();
+
+    // Start Game
+    function startGame() {
+      const count = parseInt(document.getElementById('player-count').value);
+      players = [];
+      for (let i = 1; i <= count; i++) {
+        const val = document.getElementById(`p-name-${i}`).value.trim();
+        players.push(val || `Player ${i}`);
+      }
+
+      const cat = document.getElementById('category-select').value;
+      const itemList = DATABASE[cat];
+      const selectedObj = itemList[Math.floor(Math.random() * itemList.length)];
+
+      secretWord = selectedObj.word;
+      impostorHint = selectedObj.hint;
+      impostorIndex = Math.floor(Math.random() * players.length);
+      currentTurn = 0;
+
+      showScreen('screen-reveal');
+      updateRevealScreen();
+    }
+
+    // Update Reveal Screen Status
+    function updateRevealScreen() {
+      document.getElementById('current-player-title').innerText = `${players[currentTurn]}'s Turn`;
+      document.getElementById('reveal-instruction').classList.remove('hidden');
+      document.getElementById('reveal-content').classList.add('hidden');
+      document.getElementById('btn-show').classList.remove('hidden');
+      document.getElementById('btn-next').classList.add('hidden');
+      document.getElementById('reveal-card').classList.remove('impostor-alert');
+    }
+
+    // Show Secret Role
+    function showSecret() {
+      const isImpostor = (currentTurn === impostorIndex);
+      const roleText = document.getElementById('role-text');
+      const hintText = document.getElementById('hint-text');
+
+      document.getElementById('reveal-instruction').classList.add('hidden');
+      document.getElementById('reveal-content').classList.remove('hidden');
+
+      if (isImpostor) {
+        playSound('alarm');
+        document.getElementById('reveal-card').classList.add('impostor-alert');
+        roleText.innerText = "🕵️ YOU ARE THE IMPOSTOR!";
+        roleText.classList.add('impostor-text');
+        hintText.innerText = `Hint: ${impostorHint}`;
+      } else {
+        playSound('beep');
+        roleText.innerText = secretWord;
+        roleText.classList.remove('impostor-text');
+        hintText.innerText = "You are a Civilian. Keep it secret!";
+      }
+
+      document.getElementById('btn-show').classList.add('hidden');
+      document.getElementById('btn-next').classList.remove('hidden');
+    }
+
+    // Pass to Next Player
+    function nextPlayer() {
+      currentTurn++;
+      if (currentTurn < players.length) {
+        updateRevealScreen();
+      } else {
+        showScreen('screen-discuss');
+      }
+    }
+
+    // Discussion Timer
+    function startTimer() {
+      let duration = 120;
+      const display = document.getElementById('timer-display');
+      clearInterval(timerInterval);
+      
+      timerInterval = setInterval(() => {
+        let min = Math.floor(duration / 60);
+        let sec = duration % 60;
+        display.innerText = `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}`;
+        if (--duration < 0) {
+          clearInterval(timerInterval);
+          playSound('alarm');
+        }
+      }, 1000);
+    }
+
+    // Voting List
+    function showVoting() {
+      clearInterval(timerInterval);
+      const list = document.getElementById('vote-list');
+      list.innerHTML = "";
+      players.forEach((p) => {
+        list.innerHTML += `<div class="player-item"><span>👤 ${p}</span></div>`;
+      });
+      showScreen('screen-vote');
+    }
+
+    // Reveal Result
+    function revealImpostor() {
+      document.getElementById('impostor-name').innerText = players[impostorIndex];
+      document.getElementById('secret-word-display').innerText = secretWord;
+      showScreen('screen-result');
+    }
+
+    // Screen Switcher Helper
+    function showScreen(screenId) {
+      document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+      document.getElementById(screenId).classList.remove('hidden');
+    }
+
+    // Reset Game
+    function resetGame() {
+      showScreen('screen-setup');
+    }
+  </script>
+</body>
+</html>
